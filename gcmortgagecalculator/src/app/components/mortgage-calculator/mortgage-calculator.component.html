@@ -1,1 +1,97 @@
-<p>mortgage-calculator works!</p>
+<div class="mortgage-calc-div">
+
+  <div class="calc-forms">
+    <form [formGroup]="mrtgCalcForm">
+      <div class="payment-plan">
+        <div class="sub-header">
+          Payment Plan
+        </div>
+        <div>
+          <span class="currency-symbol">$</span>
+          <mat-form-field>
+            <mat-label>Mortgage Amount</mat-label>
+            <input matInput formControlName="mrtgAmt" />
+          </mat-form-field>
+        </div>
+        <div>
+          <mat-form-field>
+            <mat-label>Interest Rate</mat-label>
+            <input matInput formControlName="intRate" />
+          </mat-form-field>
+          <span class="percent-symbol">%</span>
+        </div>
+        <div class="amortization">
+          <label>Amortization Period</label>
+          <mat-form-field appearance="fill">
+            <mat-label>Years</mat-label>
+            <mat-select formControlName="amorPeriodYr">
+              <mat-option *ngFor="let amortYear of amortizationYears" [value]="amortYear.value">
+                {{amortYear.yearLabel}}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+          <mat-form-field appearance="fill">
+            <mat-label>Months</mat-label>
+            <mat-select formControlName="amorPeriodMonth">
+              <mat-option *ngFor="let amortMonth of amortizationMonths" [value]="amortMonth.value">
+                {{amortMonth.monthLabel}}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+        <div>
+          <mat-form-field appearance="fill">
+            <mat-label>Payment Frequency</mat-label>
+            <mat-select formControlName="paymtFreq">
+              <mat-option *ngFor="let paymentFrequency of paymentFrequencies" [value]="paymentFrequency.value">
+                {{paymentFrequency.frequencyLabel}}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+        <div>
+          <mat-form-field appearance="fill">
+            <mat-label>Term</mat-label>
+            <mat-select formControlName="term">
+              <mat-option *ngFor="let term of terms" [value]="term.value">
+                {{term.termLabel}}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+      </div>
+      <div class="prepayment-plan">
+        <div class="sub-header">
+            PrePayment Plan
+          </div>
+          <div>
+            <span class="currency-symbol">$</span>
+            <mat-form-field>
+              <mat-label>Prepayment Amount</mat-label>
+              <input matInput formControlName="prepaymentAmt" />
+            </mat-form-field>
+          </div>
+          <div>
+            <mat-form-field appearance="fill">
+              <mat-label>PrePayment Frequency</mat-label>
+              <mat-select formControlName="paymtFreq">
+                <mat-option *ngFor="let prepaymentFrequency of prepaymentFrequencies" [value]="prepaymentFrequency.value">
+                  {{prepaymentFrequency.frequencyLabel}}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+          <div>
+            <mat-form-field>
+              <mat-label>Start with payment</mat-label>
+              <input matInput formControlName="startWithPayment" />
+            </mat-form-field>
+          </div>
+      </div>
+      <button mat-raised-button color="primary" class="calc-button" (click)="calculateMortgageMonthly()">Calculate..</button>
+    </form>
+  </div>
+  <div class="calc-summary">
+
+  </div>
+</div>

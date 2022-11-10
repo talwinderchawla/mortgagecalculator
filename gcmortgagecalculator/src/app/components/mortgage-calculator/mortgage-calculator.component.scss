@@ -1,0 +1,61 @@
+.mortgage-calc-div {
+  .calc-forms {
+    .payment-plan {
+        margin-bottom: 20px;
+    }
+    .payment-plan, .prepayment-plan {
+      box-shadow: 0 5px 5px -3px #0003, 0 8px 10px 1px #00000024, 0 3px 14px 2px #0000001f;
+      padding: 15px;
+
+      .sub-header {
+        font-size: 1.5rem;
+        height: 40px;
+        padding-top: 10px;
+        text-align: center;
+      }
+
+      .currency-symbol {
+        margin-right: 10px;
+      }
+
+      .amortization {
+        label {
+          display: block;
+        }
+
+        mat-form-field {
+          width: 50%;
+          display: inline-block;
+        }
+      }
+    }
+
+    .calc-button {
+        margin: 30px auto;
+        display: block;
+        width: 200px;
+    }
+
+  }
+}
+
+/* Desktop CSS */
+@media screen and ( min-width: 769px){
+    .mortgage-calc-div {
+        .calc-forms {
+        .payment-plan {
+            margin-right: 30px;
+        }
+          .payment-plan, .prepayment-plan  {
+            width: 40%;
+            display: inline-block;
+            vertical-align: top;
+          }
+          .calc-button {
+            margin: 30px 0px;
+        }
+        }
+    }
+    
+}
+

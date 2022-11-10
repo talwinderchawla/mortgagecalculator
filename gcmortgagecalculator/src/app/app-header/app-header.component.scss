@@ -12,3 +12,13 @@
     display: inline-block;
   }
 }
+
+
+/* Desktop CSS */
+@media screen and ( min-width: 769px){
+    .app-header-div {
+        height: 100px;
+        padding-top: 20px;
+        text-align: left;
+    }
+}
