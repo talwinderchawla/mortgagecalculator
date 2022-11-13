@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { FormControl, FormGroup, Validators } from '@angular/forms';
+import { UntypedFormControl, UntypedFormGroup, Validators } from '@angular/forms';
 
 @Component({
   selector: 'app-mortgage-calculator',
@@ -7,18 +7,18 @@ import { FormControl, FormGroup, Validators } from '@angular/forms';
   styleUrls: ['./mortgage-calculator.component.scss'],
 })
 export class MortgageCalculatorComponent implements OnInit {
-  mrtgCalcForm = new FormGroup({
-    mrtgAmt: new FormControl('', {
+  mrtgCalcForm = new UntypedFormGroup({
+    mrtgAmt: new UntypedFormControl('', {
       validators: [Validators.required, Validators.pattern('^[0-9]*$')],
     }),
-    intRate: new FormControl('', { validators: [Validators.required] }),
-    amorPeriodYr: new FormControl('', {}),
-    amorPeriodMonth: new FormControl('', {}),
-    paymtFreq: new FormControl('', { validators: [Validators.required] }),
-    term: new FormControl('', { validators: [Validators.required] }),
-    prepaymentAmt: new FormControl(''),
-    prepaymentFreq: new FormControl(''),
-    startWithPayment: new FormControl('', {
+    intRate: new UntypedFormControl('', { validators: [Validators.required] }),
+    amorPeriodYr: new UntypedFormControl('', {}),
+    amorPeriodMonth: new UntypedFormControl('', {}),
+    paymtFreq: new UntypedFormControl('', { validators: [Validators.required] }),
+    term: new UntypedFormControl('', { validators: [Validators.required] }),
+    prepaymentAmt: new UntypedFormControl(''),
+    prepaymentFreq: new UntypedFormControl(''),
+    startWithPayment: new UntypedFormControl('', {
       validators: [Validators.required, Validators.pattern('^[0-9]*$')],
     }),
   });
