@@ -1,5 +1,12 @@
+import { CurrencyPipe } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
-import { UntypedFormControl, UntypedFormGroup, Validators } from '@angular/forms';
+import {
+  UntypedFormControl,
+  UntypedFormGroup,
+  Validators,
+} from '@angular/forms';
+import { MatTableDataSource } from '@angular/material/table';
+import { MortgageCalculatorService } from 'src/app/commons/services/mortgage-calculator.service';
 
 @Component({
   selector: 'app-mortgage-calculator',
@@ -14,7 +21,9 @@ export class MortgageCalculatorComponent implements OnInit {
     intRate: new UntypedFormControl('', { validators: [Validators.required] }),
     amorPeriodYr: new UntypedFormControl('', {}),
     amorPeriodMonth: new UntypedFormControl('', {}),
-    paymtFreq: new UntypedFormControl('', { validators: [Validators.required] }),
+    paymtFreq: new UntypedFormControl('', {
+      validators: [Validators.required],
+    }),
     term: new UntypedFormControl('', { validators: [Validators.required] }),
     prepaymentAmt: new UntypedFormControl(''),
     prepaymentFreq: new UntypedFormControl(''),
@@ -71,9 +80,9 @@ export class MortgageCalculatorComponent implements OnInit {
   public paymentFrequencies: { frequencyLabel: string; value: string }[] = [
     { frequencyLabel: 'Accelerated Weekly', value: 'accw' },
     { frequencyLabel: 'Weekly', value: 'weekly' },
-    { frequencyLabel: 'Accelerated Bi-weekly', value: 'AccBiW' },
-    { frequencyLabel: 'Bi-Weekly (every 2 weeks)', value: 'BiW' },
-    { frequencyLabel: 'Semi-monthly (24x per year)', value: 'SemiM' },
+    { frequencyLabel: 'Accelerated Bi-weekly', value: 'accbiw' },
+    { frequencyLabel: 'Bi-Weekly (every 2 weeks)', value: 'biw' },
+    { frequencyLabel: 'Semi-monthly (24x per year)', value: 'semim' },
     { frequencyLabel: 'Monthly (12x per year)', value: 'monthly' },
   ];
 
@@ -96,44 +105,197 @@ export class MortgageCalculatorComponent implements OnInit {
     { termLabel: '10 Years', value: 10 },
   ];
 
-  constructor() {}
+  public dataSource = new MatTableDataSource<MortgageSummary>();
+  public displayedColumns: string[] = [];
+
+  public amortizationInfo: AmortizationInfo = {
+    interestpayments: 0,
+    principalpayments: 0,
+    totalcost: 0,
+    interestSavings: 0,
+    numOfPayments: 0,
+    frequencyPayment: 0,
+    numOfTermPayments: 0,
+    termInterest: 0,
+    termPrincipal: 0,
+  };
+
+  private mortgageSummary: MortgageSummary[];
+
+  constructor(
+    private mortgageCalcService: MortgageCalculatorService,
+    private currencyPipe: CurrencyPipe
+  ) {
+    this.mortgageSummary = [];
+  }
 
   ngOnInit(): void {
-
-    
-    console.log("Math ", Math.pow(1.00417, 12));
-
+    this.displayedColumns = ['category', 'term', 'amortperiod'];
   }
-
 
   calculateMortgageMonthly() {
-    
-    //Formula M = P [ i(1 + i)^n ] / [ (1 + i)^n – 1].
-    
-    console.log("Math ", Math.pow(1.00417, 12));
-
+    const yearsVal = this.mrtgCalcForm.controls['amorPeriodYr'].value;
+    const monthsVal = this.mrtgCalcForm.controls['amorPeriodMonth'].value;
+    const mortFreq: string = this.mrtgCalcForm.controls['paymtFreq'].value;
     const principal = this.mrtgCalcForm.controls['mrtgAmt'].value;
-    const perAnnumInterest =  this.mrtgCalcForm.controls['intRate'].value / 1200;
-    const monthsAmortization =  this.mrtgCalcForm.controls['amorPeriodYr'].value * 12 + this.mrtgCalcForm.controls['amorPeriodMonth'].value;
+    const perAnnumInterest = this.mrtgCalcForm.controls['intRate'].value;
+    const termYears = this.mrtgCalcForm.controls['term'].value;
+    const monthsAmortization = yearsVal * 12 + monthsVal;
 
-    console.log("principal ", principal, " perAnnumInterest ", perAnnumInterest, " monthsAmortization ", monthsAmortization );
+    this.amortizationInfo = this.getMortgageInfo(
+      parseFloat(perAnnumInterest),
+      parseFloat(principal),
+      parseInt(monthsAmortization),
+      mortFreq,
+      termYears
+    );
 
-     
-    const step1 = perAnnumInterest + 1;
-    const step2 =  Math.pow( step1 ,360); 
-    const step3 = perAnnumInterest * step2; 
-    const step4 = step2 - 1;
-    const step5 = step3 / step4;
-    
-    
-    
-    let monthlyCosts = principal * step5;
+    let termInfo: TermInfo = {
+      numofpayments: this.amortizationInfo.numOfTermPayments,
+      principalpayments: this.amortizationInfo.termPrincipal,
+      interestpayment: this.amortizationInfo.termInterest,
+      totalcost:
+        this.amortizationInfo.termPrincipal +
+        this.amortizationInfo.termInterest,
+    };
 
-    console.log("Monthly cost ", monthlyCosts);
-
-
-    
+    this.populateMortgageSummary(this.amortizationInfo, termInfo);
   }
 
+  private getMortgageInfo(
+    percentRate: number,
+    amount: number,
+    amortizationMonths: number,
+    paymentFrequency: string,
+    termYears: number
+  ) {
+    const mortgageCalculations: {
+      frequencyPayment: number;
+      frequencyRate: number;
+      monthlyPayment: number;
+      yearlyNumOfPayments: number;
+    } = this.mortgageCalcService.getMortgageDetails(
+      percentRate,
+      amount,
+      amortizationMonths,
+      paymentFrequency
+    );
+    let balance = amount;
+    let frequency = 1;
+    let totalInterestPaid = 0;
+    let totalPrincipalPaid = 0;
+    const numOfTermPayments =
+      mortgageCalculations.yearlyNumOfPayments * termYears;
+    let termInterest = 0;
+    let termPrincipal = 0;
 
+    while (true) {
+      const interest = balance * mortgageCalculations.frequencyRate;
+
+      // Increment total interest based on the interest paid in regular payments.
+      totalInterestPaid = totalInterestPaid + interest;
+
+      let payment = mortgageCalculations.frequencyPayment;
+
+      let principal = payment - interest;
+
+      totalPrincipalPaid = totalPrincipalPaid + principal;
+
+      balance = balance - principal;
+
+      if (frequency == numOfTermPayments) {
+        termInterest = totalInterestPaid;
+        termPrincipal = totalPrincipalPaid;
+      }
+
+      if (balance < 0) {
+        payment = payment + balance;
+        principal = payment - interest;
+        balance = 0;
+      }
+
+      if (balance === 0) {
+        break;
+      }
+      frequency++;
+    }
+
+    console.log('totalInterestPaid ', totalInterestPaid);
+    console.log('Total amount paid ', amount + totalInterestPaid);
+    console.log('Num of payments', frequency);
+
+    const totalCostBasedOnFreq = totalInterestPaid + amount;
+    const totalCostForMonthly =
+      mortgageCalculations.monthlyPayment * amortizationMonths;
+
+    return {
+      interestpayments: totalInterestPaid,
+      principalpayments: amount,
+      totalcost: totalCostBasedOnFreq,
+      interestSavings: totalCostForMonthly - totalCostBasedOnFreq,
+      numOfPayments: frequency,
+      frequencyPayment: mortgageCalculations.frequencyPayment,
+      numOfTermPayments: numOfTermPayments,
+      termInterest: termInterest,
+      termPrincipal: termPrincipal,
+    };
+  }
+
+  private populateMortgageSummary(
+    amortInfo: AmortizationInfo,
+    termInfo: TermInfo
+  ) {
+    this.mortgageSummary = [];
+    this.mortgageSummary.push({
+      category: 'Num of Payments',
+      term: termInfo['numofpayments'] + '',
+      amortperiod: amortInfo['numOfPayments'] + '',
+    });
+    this.mortgageSummary.push({
+      category: 'Mortgage Payment',
+      term: this.currencyPipe.transform(amortInfo['frequencyPayment']),
+      amortperiod: this.currencyPipe.transform(amortInfo['frequencyPayment']),
+    });
+    this.mortgageSummary.push({
+      category: 'Principal Payments',
+      term: this.currencyPipe.transform(termInfo['principalpayments']),
+      amortperiod: this.currencyPipe.transform(amortInfo['principalpayments']),
+    });
+    this.mortgageSummary.push({
+      category: 'Interest Payments',
+      term: this.currencyPipe.transform(termInfo['interestpayment']),
+      amortperiod: this.currencyPipe.transform(amortInfo['interestpayments']),
+    });
+    this.mortgageSummary.push({
+      category: 'Total Cost',
+      term: this.currencyPipe.transform(termInfo['totalcost']),
+      amortperiod: this.currencyPipe.transform(amortInfo['totalcost']),
+    });
+    this.dataSource.data = this.mortgageSummary;
+  }
+}
+
+export interface MortgageSummary {
+  category: string;
+  term: string | null;
+  amortperiod: string | null;
+}
+
+export interface AmortizationInfo {
+  interestpayments: number;
+  principalpayments: number;
+  totalcost: number;
+  interestSavings: number;
+  numOfPayments: number;
+  frequencyPayment: number;
+  numOfTermPayments: number;
+  termInterest: number;
+  termPrincipal: number;
+}
+
+export interface TermInfo {
+  numofpayments: number;
+  principalpayments: number;
+  interestpayment: number;
+  totalcost: number;
 }

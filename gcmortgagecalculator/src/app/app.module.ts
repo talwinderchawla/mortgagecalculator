@@ -8,6 +8,7 @@ import { AppHeaderComponent } from './app-header/app-header.component';
 import { MortgageCalculatorComponent } from './components/mortgage-calculator/mortgage-calculator.component';
 import { MaterialLibsModule } from './commons/material-libs/material-libs.module';
 import { ReactiveFormsModule } from '@angular/forms';
+import { CurrencyPipe } from '@angular/common';
 
 @NgModule({
   declarations: [
@@ -22,7 +23,7 @@ import { ReactiveFormsModule } from '@angular/forms';
     MaterialLibsModule,
     ReactiveFormsModule
   ],
-  providers: [],
+  providers: [CurrencyPipe],
   bootstrap: [AppComponent]
 })
 export class AppModule { }
