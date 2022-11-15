@@ -14,4 +14,3 @@ Steps to run the application:
 > Run command “npm install” to install all packages
 > Run command “ng serve” to start on default port
 > Use url “http://localhost:4200/“ to access Mortgage Calculator
-
