@@ -1,16 +1,33 @@
+import { CurrencyPipe } from '@angular/common';
 import { TestBed } from '@angular/core/testing';
 import { RouterTestingModule } from '@angular/router/testing';
+import { AppHeaderComponent } from './app-header/app-header.component';
 import { AppComponent } from './app.component';
+import { MaterialLibsModule } from './commons/material-libs/material-libs.module';
+import { MortgageCalculatorComponent } from './components/mortgage-calculator/mortgage-calculator.component';
 
 describe('AppComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [
-        RouterTestingModule
+        RouterTestingModule.withRoutes([
+          {
+            path: "",
+            pathMatch: "full",
+            redirectTo: "mortgagecalc"
+          },
+          {
+            path: "mortgagecalc",
+            component: MortgageCalculatorComponent
+          }
+        ]),
+        MaterialLibsModule,
       ],
       declarations: [
-        AppComponent
+        AppComponent,
+        AppHeaderComponent
       ],
+      providers: [ CurrencyPipe ]
     }).compileComponents();
   });
 
@@ -20,16 +37,4 @@ describe('AppComponent', () => {
     expect(app).toBeTruthy();
   });
 
-  it(`should have as title 'gcmortgagecalculator'`, () => {
-    const fixture = TestBed.createComponent(AppComponent);
-    const app = fixture.componentInstance;
-    expect(app.title).toEqual('gcmortgagecalculator');
-  });
-
-  it('should render title', () => {
-    const fixture = TestBed.createComponent(AppComponent);
-    fixture.detectChanges();
-    const compiled = fixture.nativeElement;
-    expect(compiled.querySelector('.content span').textContent).toContain('gcmortgagecalculator app is running!');
-  });
 });
