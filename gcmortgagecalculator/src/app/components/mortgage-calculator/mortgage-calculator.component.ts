@@ -6,6 +6,14 @@ import {
   Validators,
 } from '@angular/forms';
 import { MatTableDataSource } from '@angular/material/table';
+import { ChartDataSet } from 'src/app/commons/components/charts/charts.component';
+import {
+  AmortizationInfo,
+  MortgageCalculations,
+  MortgageInfo,
+  MortgageSummary,
+  TermInfo,
+} from 'src/app/commons/models/mortgage.model';
 import { MortgageCalculatorService } from 'src/app/commons/services/mortgage-calculator.service';
 
 @Component({
@@ -15,21 +23,23 @@ import { MortgageCalculatorService } from 'src/app/commons/services/mortgage-cal
 })
 export class MortgageCalculatorComponent implements OnInit {
   mrtgCalcForm = new UntypedFormGroup({
-    mrtgAmt: new UntypedFormControl('', {
-      validators: [Validators.required, Validators.pattern('^[0-9]*$')],
+    mrtgAmt: new UntypedFormControl(null, {
+      validators: [
+        Validators.required,
+        Validators.pattern('[+-]?([0-9]*[.])?[0-9]+'),
+      ],
     }),
-    intRate: new UntypedFormControl('', { validators: [Validators.required] }),
-    amorPeriodYr: new UntypedFormControl('', {}),
-    amorPeriodMonth: new UntypedFormControl('', {}),
-    paymtFreq: new UntypedFormControl('', {
+    intRate: new UntypedFormControl(null, {
+      validators: [Validators.required, Validators.pattern('[+-]?([0-9]*[.])?[0-9]+')],
+    }),
+    amorPeriodYr: new UntypedFormControl(null, {
       validators: [Validators.required],
     }),
-    term: new UntypedFormControl('', { validators: [Validators.required] }),
-    prepaymentAmt: new UntypedFormControl(''),
-    prepaymentFreq: new UntypedFormControl(''),
-    startWithPayment: new UntypedFormControl('', {
-      validators: [Validators.required, Validators.pattern('^[0-9]*$')],
+    amorPeriodMonth: new UntypedFormControl(null, { validators: [] }),
+    paymtFreq: new UntypedFormControl(null, {
+      validators: [Validators.required],
     }),
+    term: new UntypedFormControl(null, { validators: [Validators.required] }),
   });
 
   public amortizationYears: { yearLabel: string; value: number }[] = [
@@ -108,7 +118,7 @@ export class MortgageCalculatorComponent implements OnInit {
   public dataSource = new MatTableDataSource<MortgageSummary>();
   public displayedColumns: string[] = [];
 
-  public amortizationInfo: AmortizationInfo = {
+  public mortgageInfo: MortgageInfo = {
     interestpayments: 0,
     principalpayments: 0,
     totalcost: 0,
@@ -118,8 +128,15 @@ export class MortgageCalculatorComponent implements OnInit {
     numOfTermPayments: 0,
     termInterest: 0,
     termPrincipal: 0,
+    chartData: [],
+    chartLabels: [],
   };
 
+  //Chart Variables
+  public paymentChartDataSets: ChartDataSet[] = [];
+  public paymenChartLabels: number[] = [];
+
+  // Private Variables
   private mortgageSummary: MortgageSummary[];
 
   constructor(
@@ -133,7 +150,7 @@ export class MortgageCalculatorComponent implements OnInit {
     this.displayedColumns = ['category', 'term', 'amortperiod'];
   }
 
-  calculateMortgageMonthly() {
+  calculateMortgageDetails() {
     const yearsVal = this.mrtgCalcForm.controls['amorPeriodYr'].value;
     const monthsVal = this.mrtgCalcForm.controls['amorPeriodMonth'].value;
     const mortFreq: string = this.mrtgCalcForm.controls['paymtFreq'].value;
@@ -142,7 +159,8 @@ export class MortgageCalculatorComponent implements OnInit {
     const termYears = this.mrtgCalcForm.controls['term'].value;
     const monthsAmortization = yearsVal * 12 + monthsVal;
 
-    this.amortizationInfo = this.getMortgageInfo(
+    // Get Mortgagge details including amortization info
+    this.mortgageInfo = this.getMortgageInfo(
       parseFloat(perAnnumInterest),
       parseFloat(principal),
       parseInt(monthsAmortization),
@@ -150,16 +168,29 @@ export class MortgageCalculatorComponent implements OnInit {
       termYears
     );
 
-    let termInfo: TermInfo = {
-      numofpayments: this.amortizationInfo.numOfTermPayments,
-      principalpayments: this.amortizationInfo.termPrincipal,
-      interestpayment: this.amortizationInfo.termInterest,
-      totalcost:
-        this.amortizationInfo.termPrincipal +
-        this.amortizationInfo.termInterest,
+    // Seperate Amortization Data
+    let amortizationInfo: AmortizationInfo = {
+      interestpayments: this.mortgageInfo.interestpayments,
+      principalpayments: this.mortgageInfo.principalpayments,
+      totalcost: this.mortgageInfo.totalcost,
+      numOfPayments: this.mortgageInfo.numOfPayments,
+      frequencyPayment: this.mortgageInfo.frequencyPayment,
     };
 
-    this.populateMortgageSummary(this.amortizationInfo, termInfo);
+    // Seperate Term Data
+    let termInfo: TermInfo = {
+      numofpayments: this.mortgageInfo.numOfTermPayments,
+      principalpayments: this.mortgageInfo.termPrincipal,
+      interestpayment: this.mortgageInfo.termInterest,
+      totalcost:
+        this.mortgageInfo.termPrincipal + this.mortgageInfo.termInterest,
+      frequencyPayment: this.mortgageInfo.frequencyPayment,
+    };
+
+    this.populateMortgageSummary(amortizationInfo, termInfo);
+
+    this.populateChart(this.mortgageInfo.chartData, this.mortgageInfo.chartLabels, principal)
+
   }
 
   private getMortgageInfo(
@@ -169,17 +200,13 @@ export class MortgageCalculatorComponent implements OnInit {
     paymentFrequency: string,
     termYears: number
   ) {
-    const mortgageCalculations: {
-      frequencyPayment: number;
-      frequencyRate: number;
-      monthlyPayment: number;
-      yearlyNumOfPayments: number;
-    } = this.mortgageCalcService.getMortgageDetails(
-      percentRate,
-      amount,
-      amortizationMonths,
-      paymentFrequency
-    );
+    const mortgageCalculations: MortgageCalculations =
+      this.mortgageCalcService.getMortgageCalculations(
+        percentRate,
+        amount,
+        amortizationMonths,
+        paymentFrequency
+      );
     let balance = amount;
     let frequency = 1;
     let totalInterestPaid = 0;
@@ -188,6 +215,7 @@ export class MortgageCalculatorComponent implements OnInit {
       mortgageCalculations.yearlyNumOfPayments * termYears;
     let termInterest = 0;
     let termPrincipal = 0;
+    let balanceAtIntervals = [balance];
 
     while (true) {
       const interest = balance * mortgageCalculations.frequencyRate;
@@ -202,6 +230,8 @@ export class MortgageCalculatorComponent implements OnInit {
       totalPrincipalPaid = totalPrincipalPaid + principal;
 
       balance = balance - principal;
+
+      balanceAtIntervals.push(balance);
 
       if (frequency == numOfTermPayments) {
         termInterest = totalInterestPaid;
@@ -220,13 +250,29 @@ export class MortgageCalculatorComponent implements OnInit {
       frequency++;
     }
 
-    console.log('totalInterestPaid ', totalInterestPaid);
-    console.log('Total amount paid ', amount + totalInterestPaid);
-    console.log('Num of payments', frequency);
-
     const totalCostBasedOnFreq = totalInterestPaid + amount;
     const totalCostForMonthly =
       mortgageCalculations.monthlyPayment * amortizationMonths;
+
+    // For Chart
+    const intervalLength = Math.round(frequency / 4);
+    const chartLabels: number[] = [
+      0,
+      intervalLength,
+      2 * intervalLength,
+      3 * intervalLength,
+      balanceAtIntervals.length - 1,
+    ];
+
+    let chartData = [];
+
+    for (let interval in chartLabels) {
+      if (chartLabels[interval] == balanceAtIntervals.length - 1) {
+        chartData.push(0);
+      } else {
+        chartData.push(balanceAtIntervals[chartLabels[interval]]);
+      }
+    }
 
     return {
       interestpayments: totalInterestPaid,
@@ -238,6 +284,8 @@ export class MortgageCalculatorComponent implements OnInit {
       numOfTermPayments: numOfTermPayments,
       termInterest: termInterest,
       termPrincipal: termPrincipal,
+      chartData: chartData,
+      chartLabels: chartLabels,
     };
   }
 
@@ -253,7 +301,7 @@ export class MortgageCalculatorComponent implements OnInit {
     });
     this.mortgageSummary.push({
       category: 'Mortgage Payment',
-      term: this.currencyPipe.transform(amortInfo['frequencyPayment']),
+      term: this.currencyPipe.transform(termInfo['frequencyPayment']),
       amortperiod: this.currencyPipe.transform(amortInfo['frequencyPayment']),
     });
     this.mortgageSummary.push({
@@ -273,29 +321,27 @@ export class MortgageCalculatorComponent implements OnInit {
     });
     this.dataSource.data = this.mortgageSummary;
   }
-}
 
-export interface MortgageSummary {
-  category: string;
-  term: string | null;
-  amortperiod: string | null;
-}
+  private populateChart(chartData: number[] , chartLabels: number[], principal: number ) {
+    this.paymentChartDataSets = [
+      {
+        data: chartData,
+        label: 'Payment History',
+        fill: true,
+        tension: 0.5,
+        borderColor: 'black',
+        backgroundColor: 'rgba(255,0,0,0.3)',
+      },
+      {
+        data: [principal, principal, principal, principal, principal],
+        label: 'Mortgage Amount',
+        fill: false,
+        tension: 0.5,
+        borderColor: 'black',
+        backgroundColor: 'rgba(255,0,0,0.3)',
+      },
+    ];
 
-export interface AmortizationInfo {
-  interestpayments: number;
-  principalpayments: number;
-  totalcost: number;
-  interestSavings: number;
-  numOfPayments: number;
-  frequencyPayment: number;
-  numOfTermPayments: number;
-  termInterest: number;
-  termPrincipal: number;
-}
-
-export interface TermInfo {
-  numofpayments: number;
-  principalpayments: number;
-  interestpayment: number;
-  totalcost: number;
+    this.paymenChartLabels = chartLabels;
+  }
 }

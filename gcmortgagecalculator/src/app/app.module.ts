@@ -9,19 +9,23 @@ import { MortgageCalculatorComponent } from './components/mortgage-calculator/mo
 import { MaterialLibsModule } from './commons/material-libs/material-libs.module';
 import { ReactiveFormsModule } from '@angular/forms';
 import { CurrencyPipe } from '@angular/common';
+import { NgChartsModule } from 'ng2-charts';
+import { ChartsComponent } from './commons/components/charts/charts.component';
 
 @NgModule({
   declarations: [
     AppComponent,
     AppHeaderComponent,
-    MortgageCalculatorComponent
+    MortgageCalculatorComponent,
+    ChartsComponent
   ],
   imports: [
     BrowserModule,
     AppRoutingModule,
     BrowserAnimationsModule,
     MaterialLibsModule,
-    ReactiveFormsModule
+    ReactiveFormsModule,
+    NgChartsModule
   ],
   providers: [CurrencyPipe],
   bootstrap: [AppComponent]

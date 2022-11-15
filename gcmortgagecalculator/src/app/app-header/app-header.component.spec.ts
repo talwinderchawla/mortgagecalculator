@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { MaterialLibsModule } from '../commons/material-libs/material-libs.module';
 
 import { AppHeaderComponent } from './app-header.component';
 
@@ -8,6 +9,7 @@ describe('AppHeaderComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
+      imports: [MaterialLibsModule],
       declarations: [ AppHeaderComponent ]
     })
     .compileComponents();
