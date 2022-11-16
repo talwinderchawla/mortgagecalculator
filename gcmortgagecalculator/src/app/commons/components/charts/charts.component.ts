@@ -13,26 +13,54 @@ import { ChartConfiguration, ChartOptions, ChartType } from 'chart.js';
   styleUrls: ['./charts.component.scss'],
 })
 export class ChartsComponent implements OnInit, OnChanges {
-  @Input() inputChartLabels: number[] = [];
-  @Input() inputChartDatasets: ChartDataSet[] = [];
+  @Input() chartType: string = 'line';
+  @Input() inputLineChartLabels: number[] = [];
+  @Input() inputLineChartDatasets: ChartDataSet[] = [];
+  @Input() inputBarChartLabels: string[] = [];
+  @Input() inputBarChartDatasets: { data: number[]; label: string }[] = [];
+
+  public typeOfChart = this.chartType;
 
   public lineChartData: ChartConfiguration<'line'>['data'] = {
-    labels: this.inputChartLabels,
-    datasets: this.inputChartDatasets,
+    labels: this.inputLineChartLabels,
+    datasets: this.inputLineChartDatasets,
   };
   public lineChartLegend = true;
 
   public lineChartOptions: ChartOptions<'line'> = {
     responsive: false,
   };
+
+  public barChartOptions: ChartOptions = {
+    responsive: false,
+    scales: {
+      x: {
+        stacked: true,
+      },
+    },
+  };
+
+  public barChartType: ChartType = 'bar';
+  public barChartLegend = true;
+
+  public barChartData: ChartConfiguration<'bar'>['data'] = {
+    labels: this.inputBarChartLabels,
+    datasets: this.inputBarChartDatasets,
+  };
+
   constructor() {}
 
   ngOnInit(): void {}
 
   ngOnChanges(changes: SimpleChanges): void {
     this.lineChartData = {
-      labels: this.inputChartLabels,
-      datasets: this.inputChartDatasets,
+      labels: this.inputLineChartLabels,
+      datasets: this.inputLineChartDatasets,
+    };
+
+    this.barChartData = {
+      labels: this.inputBarChartLabels,
+      datasets: this.inputBarChartDatasets,
     };
   }
 }

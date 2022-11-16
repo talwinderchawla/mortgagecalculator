@@ -137,7 +137,7 @@ describe('MortgageCalculatorComponent', () => {
     fixture.detectChanges();
 
     fixture.whenStable().then(() => {
-     // expect(component.dataSource.data).toBe(expectedVal);
+      // expect(component.dataSource.data).toBe(expectedVal);
       expect(component.dataSource.data).toEqual(expectedVal);
     });
   });
@@ -164,7 +164,7 @@ describe('MortgageCalculatorComponent', () => {
         category: 'Total Cost',
         term: '$32,021.40',
         amortperiod: '$192,128.96',
-      }
+      },
     ];
 
     await populateFormWithValues({

@@ -10,17 +10,21 @@
           <span class="currency-symbol">$</span>
           <mat-form-field>
             <mat-label>Mortgage Amount</mat-label>
-            <input matInput formControlName="mrtgAmt"  id="mortgAmt"/>
-            <mat-error *ngIf="mrtgCalcForm.controls['mrtgAmt'].errors?.['required']">Mortgage Amount is required</mat-error>
-            <mat-error *ngIf="mrtgCalcForm.controls['mrtgAmt'].errors?.['pattern']">Only Numbers are allowed and can have decimal.</mat-error>
+            <input matInput formControlName="mrtgAmt" id="mortgAmt" />
+            <mat-error *ngIf="mrtgCalcForm.controls['mrtgAmt'].errors?.['required']">Mortgage Amount is required
+            </mat-error>
+            <mat-error *ngIf="mrtgCalcForm.controls['mrtgAmt'].errors?.['pattern']">Only Numbers are allowed and can
+              have decimal.</mat-error>
           </mat-form-field>
         </div>
-        <div  class="form-field" >
+        <div class="form-field">
           <mat-form-field>
             <mat-label>Interest Rate</mat-label>
             <input matInput formControlName="intRate" id="intRate" />
-            <mat-error *ngIf="mrtgCalcForm.controls['intRate'].errors?.['required']">Interest Rate is required</mat-error>
-            <mat-error *ngIf="mrtgCalcForm.controls['intRate'].errors?.['pattern']">Only Numbers are allowed and can have decimal.</mat-error>
+            <mat-error *ngIf="mrtgCalcForm.controls['intRate'].errors?.['required']">Interest Rate is required
+            </mat-error>
+            <mat-error *ngIf="mrtgCalcForm.controls['intRate'].errors?.['pattern']">Only Numbers are allowed and can
+              have decimal.</mat-error>
           </mat-form-field>
           <span class="percent-symbol">%</span>
         </div>
@@ -43,7 +47,7 @@
             </mat-select>
           </mat-form-field>
         </div>
-        <div  class="form-field">
+        <div class="form-field">
           <mat-form-field appearance="fill">
             <mat-label>Payment Frequency</mat-label>
             <mat-select formControlName="paymtFreq" id="paymtFreq">
@@ -54,7 +58,7 @@
             <mat-error *ngIf="mrtgCalcForm.controls['paymtFreq'].invalid">Payment Frequency is required</mat-error>
           </mat-form-field>
         </div>
-        <div  class="form-field">
+        <div class="form-field">
           <mat-form-field appearance="fill">
             <mat-label>Term</mat-label>
             <mat-select formControlName="term" id="term">
@@ -68,32 +72,33 @@
       </div>
       <div class="prepayment-plan">
         <div class="sub-header">
-            PrePayment Plan
-          </div>
-          <div>
-            <span class="currency-symbol">$</span>
-            <mat-form-field>
-              <mat-label>Prepayment Amount</mat-label>
-              <input matInput formControlName="prepaymentAmt" />
-            </mat-form-field>
-          </div>
-          <div>
-            <mat-form-field appearance="fill">
-              <mat-label>PrePayment Frequency</mat-label>
-              <mat-select formControlName="prepaymentFreq">
-                <mat-option *ngFor="let prepaymentFrequency of prepaymentFrequencies" [value]="prepaymentFrequency.value">
-                  {{prepaymentFrequency.frequencyLabel}}
-                </mat-option>
-              </mat-select>
-            </mat-form-field>
-          </div>
-          <div>
-            <mat-form-field>
-              <mat-label>Start with payment</mat-label>
-              <input matInput formControlName="startWithPayment" />
-              <mat-error *ngIf="mrtgCalcForm.controls['startWithPayment'].errors?.['pattern']">Only numbers greater than 0 are allowed.</mat-error>
-            </mat-form-field>
-          </div>
+          PrePayment Plan
+        </div>
+        <div>
+          <span class="currency-symbol">$</span>
+          <mat-form-field>
+            <mat-label>Prepayment Amount</mat-label>
+            <input matInput formControlName="prepaymentAmt" />
+          </mat-form-field>
+        </div>
+        <div>
+          <mat-form-field appearance="fill">
+            <mat-label>PrePayment Frequency</mat-label>
+            <mat-select formControlName="prepaymentFreq">
+              <mat-option *ngFor="let prepaymentFrequency of prepaymentFrequencies" [value]="prepaymentFrequency.value">
+                {{prepaymentFrequency.frequencyLabel}}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+        <div>
+          <mat-form-field>
+            <mat-label>Start with payment</mat-label>
+            <input matInput formControlName="startWithPayment" />
+            <mat-error *ngIf="mrtgCalcForm.controls['startWithPayment'].errors?.['pattern']">Only numbers greater than 0
+              are allowed.</mat-error>
+          </mat-form-field>
+        </div>
       </div>
       <button mat-raised-button color="primary" id="calculate" class="calc-button" type="submit">Calculate..</button>
     </form>
@@ -133,6 +138,15 @@
 
   <div class="plotted-charts">
     <h3>Payment Diagram</h3>
-    <app-charts [inputChartLabels]="paymenChartLabels" [inputChartDatasets]="paymentChartDataSets"></app-charts>
+
+    <div class="line-chart">
+      <app-charts [chartType]="'line'" [inputLineChartLabels]="paymenLineChartLabels"
+        [inputLineChartDatasets]="paymentLineChartDataSets"></app-charts>
+    </div>
+    <div class="bar-chart">
+      <app-charts [chartType]="'bar'" [inputBarChartLabels]="paymenBarChartLabels"
+        [inputBarChartDatasets]="paymentBarChartDataSets"></app-charts>
+    </div>
+
   </div>
 </div>

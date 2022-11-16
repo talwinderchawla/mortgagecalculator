@@ -145,8 +145,10 @@ export class MortgageCalculatorComponent implements OnInit {
   };
 
   //Chart Variables
-  public paymentChartDataSets: ChartDataSet[] = [];
-  public paymenChartLabels: number[] = [];
+  public paymentLineChartDataSets: ChartDataSet[] = [];
+  public paymenLineChartLabels: number[] = [];
+  public paymentBarChartDataSets: { data: number[]; label: string }[] = [];
+  public paymenBarChartLabels: string[] = [];
 
   // Private Variables
   private mortgageSummary: MortgageSummary[];
@@ -216,13 +218,60 @@ export class MortgageCalculatorComponent implements OnInit {
       totalInterestSavings: this.mortgageInfo.termInterestSavings,
     };
 
+    // Populate Mortgage Summary table on UI.
     this.populateMortgageSummary(amortizationInfo, termInfo, mortFreq);
 
-    this.populateChart(
+    // Create line chart showing payment diagram
+    this.populateLineChart(
       this.mortgageInfo.chartData,
       this.mortgageInfo.chartLabels,
       principal
     );
+
+    // Create bar chart showing interest and principal. If prepayment is involved populate bar chart with second series
+    if (prepaymentValue && prepaymentValue != 0) {
+      this.populateBarChart(
+        [
+          {
+            data: [
+              this.mortgageInfo.principalpayments,
+              this.mortgageInfo.principalpayments,
+            ],
+            label: 'Principal Payments',
+          },
+          {
+            data: [
+              this.mortgageInfo.principalpayments +
+                this.mortgageInfo.interestpayments +
+                this.mortgageInfo.interestSavings,
+              this.mortgageInfo.principalpayments +
+                this.mortgageInfo.interestpayments,
+            ],
+            label: 'Interest Payments',
+          },
+        ],
+        ['Regular Payments', 'Prepayments'],
+        principal
+      );
+    } else {
+      this.populateBarChart(
+        [
+          {
+            data: [this.mortgageInfo.principalpayments],
+            label: 'Principal Payments',
+          },
+          {
+            data: [
+              this.mortgageInfo.principalpayments +
+                this.mortgageInfo.interestpayments,
+            ],
+            label: 'Interest Payments',
+          },
+        ],
+        ['Regular Payments'],
+        principal
+      );
+    }
   }
 
   private getMortgageInfo(
@@ -249,7 +298,6 @@ export class MortgageCalculatorComponent implements OnInit {
     let termInterest = 0;
     let termPrincipal = 0;
     let balanceAtIntervals = [balance];
-
     let onetimePrepaymentDone = false;
 
     while (true) {
@@ -266,7 +314,7 @@ export class MortgageCalculatorComponent implements OnInit {
 
       balance = balance - principal;
 
-      // Handle prepayment
+      // Handle prepayment - if prepayment is due subtract it from balance amount directly as per specified intervals.
       if (prepaymentInfo.prepaymentValue != undefined) {
         switch (prepaymentInfo.prepaymentFreq) {
           case 'onetime':
@@ -377,12 +425,12 @@ export class MortgageCalculatorComponent implements OnInit {
       term: this.currencyPipe.transform(termInfo['frequencyPayment']),
       amortperiod: this.currencyPipe.transform(amortInfo['frequencyPayment']),
     });
-    if(this.currencyPipe.transform(termInfo['prepayment']) != null) {
+    if (this.currencyPipe.transform(termInfo['prepayment']) != null) {
       this.mortgageSummary.push({
         category: 'Prepayment',
         term: this.currencyPipe.transform(termInfo['prepayment']),
         amortperiod: this.currencyPipe.transform(amortInfo['prepayment']),
-      });  
+      });
     }
     this.mortgageSummary.push({
       category: 'Principal Payments',
@@ -399,7 +447,10 @@ export class MortgageCalculatorComponent implements OnInit {
       term: this.currencyPipe.transform(termInfo['totalcost']),
       amortperiod: this.currencyPipe.transform(amortInfo['totalcost']),
     });
-    if(mortFreq != 'monthly' || this.currencyPipe.transform(termInfo['prepayment']) != null) {
+    if (
+      mortFreq != 'monthly' ||
+      this.currencyPipe.transform(termInfo['prepayment']) != null
+    ) {
       this.mortgageSummary.push({
         category: 'Total interest savings',
         term: this.currencyPipe.transform(termInfo['totalInterestSavings']),
@@ -411,12 +462,12 @@ export class MortgageCalculatorComponent implements OnInit {
     this.dataSource.data = this.mortgageSummary;
   }
 
-  private populateChart(
+  private populateLineChart(
     chartData: number[],
     chartLabels: number[],
     principal: number
   ) {
-    this.paymentChartDataSets = [
+    this.paymentLineChartDataSets = [
       {
         data: chartData,
         label: 'Payment History',
@@ -435,6 +486,16 @@ export class MortgageCalculatorComponent implements OnInit {
       },
     ];
 
-    this.paymenChartLabels = chartLabels;
+    this.paymenLineChartLabels = chartLabels;
+  }
+
+  private populateBarChart(
+    chartData: { data: number[]; label: string }[],
+    chartLabels: string[],
+    principal: number
+  ) {
+    this.paymentBarChartDataSets = chartData;
+
+    this.paymenBarChartLabels = chartLabels;
   }
 }

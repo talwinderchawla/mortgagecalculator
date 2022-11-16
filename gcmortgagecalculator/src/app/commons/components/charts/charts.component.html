@@ -1,4 +1,6 @@
 <div>
-  <canvas baseChart width="400" height="400" [type]="'line'" [data]="lineChartData" [options]="lineChartOptions"
-    [legend]="lineChartLegend"></canvas>
+  <canvas *ngIf="chartType == 'line'" baseChart width="400" height="400" [type]="'line'" [data]="lineChartData"
+    [options]="lineChartOptions" [legend]="lineChartLegend"></canvas>
+  <canvas *ngIf="chartType == 'bar'" baseChart width="400" height="400" [type]="'bar'" [data]="barChartData"
+    [options]="barChartOptions" [legend]="barChartLegend"></canvas>
 </div>
