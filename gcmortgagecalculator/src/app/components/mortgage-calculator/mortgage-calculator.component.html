@@ -66,6 +66,34 @@
           </mat-form-field>
         </div>
       </div>
+      <div class="prepayment-plan">
+        <div class="sub-header">
+            PrePayment Plan
+          </div>
+          <div>
+            <span class="currency-symbol">$</span>
+            <mat-form-field>
+              <mat-label>Prepayment Amount</mat-label>
+              <input matInput formControlName="prepaymentAmt" />
+            </mat-form-field>
+          </div>
+          <div>
+            <mat-form-field appearance="fill">
+              <mat-label>PrePayment Frequency</mat-label>
+              <mat-select formControlName="prepaymentFreq">
+                <mat-option *ngFor="let prepaymentFrequency of prepaymentFrequencies" [value]="prepaymentFrequency.value">
+                  {{prepaymentFrequency.frequencyLabel}}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+          <div>
+            <mat-form-field>
+              <mat-label>Start with payment</mat-label>
+              <input matInput formControlName="startWithPayment" />
+            </mat-form-field>
+          </div>
+      </div>
       <button mat-raised-button color="primary" id="calculate" class="calc-button" type="submit">Calculate..</button>
     </form>
   </div>

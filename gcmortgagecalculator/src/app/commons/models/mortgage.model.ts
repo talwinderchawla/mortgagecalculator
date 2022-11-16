@@ -4,6 +4,12 @@ export interface MortgageSummary {
     amortperiod: string | null;
   }
   
+  export interface PrepaymentInfo {
+    prepaymentValue: number,
+    prepaymentFreq: string,
+    prepaymentStartPoint: number
+  }
+
   export interface MortgageInfo {
     interestpayments: number;
     principalpayments: number;
@@ -14,6 +20,7 @@ export interface MortgageSummary {
     numOfTermPayments: number;
     termInterest: number;
     termPrincipal: number;
+    termInterestSavings: number;
     chartData: number[];
     chartLabels: number[];
   }
@@ -24,6 +31,8 @@ export interface MortgageSummary {
     totalcost: number;
     numOfPayments: number;
     frequencyPayment: number;
+    prepayment: number;
+    totalInterestSavings: number | null;
   }
   
   export interface TermInfo {
@@ -32,6 +41,8 @@ export interface MortgageSummary {
     interestpayment: number;
     totalcost: number;
     frequencyPayment: number;
+    prepayment: number;
+    totalInterestSavings: number | null;
   }
   
   
