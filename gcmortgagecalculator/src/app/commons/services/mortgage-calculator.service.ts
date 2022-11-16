@@ -12,7 +12,6 @@ export class MortgageCalculatorService {
     amortizationMonths: number,
     paymentFrequency: string
   ) {
-
     // Calculate compounded rate based on compounded semi-anually
     const compoundedRate = Math.pow(1 + nominalRate / 200, 2) - 1;
 
