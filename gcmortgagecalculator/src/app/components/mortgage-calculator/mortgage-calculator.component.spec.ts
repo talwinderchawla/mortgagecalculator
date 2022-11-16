@@ -95,7 +95,6 @@ describe('MortgageCalculatorComponent', () => {
         term: '$123.16',
         amortperiod: '$123.16',
       },
-      { category: 'Prepayment', term: null, amortperiod: null },
       {
         category: 'Principal Payments',
         term: '$8,295.91',
@@ -138,7 +137,7 @@ describe('MortgageCalculatorComponent', () => {
     fixture.detectChanges();
 
     fixture.whenStable().then(() => {
-      // expect(component.dataSource.data).toBe(expectedVal);
+     // expect(component.dataSource.data).toBe(expectedVal);
       expect(component.dataSource.data).toEqual(expectedVal);
     });
   });
@@ -151,7 +150,6 @@ describe('MortgageCalculatorComponent', () => {
         term: '$533.69',
         amortperiod: '$533.69',
       },
-      { category: 'Prepayment', term: null, amortperiod: null },
       {
         category: 'Principal Payments',
         term: '$8,238.24',
@@ -166,12 +164,7 @@ describe('MortgageCalculatorComponent', () => {
         category: 'Total Cost',
         term: '$32,021.40',
         amortperiod: '$192,128.96',
-      },
-      {
-        category: 'Total interest savings',
-        term: null,
-        amortperiod: null,
-      },
+      }
     ];
 
     await populateFormWithValues({
@@ -206,7 +199,6 @@ describe('MortgageCalculatorComponent', () => {
         term: '$266.85',
         amortperiod: '$266.85',
       },
-      { category: 'Prepayment', term: null, amortperiod: null },
       {
         category: 'Principal Payments',
         term: '$8,276.26',
@@ -261,7 +253,6 @@ describe('MortgageCalculatorComponent', () => {
         term: '$266.85',
         amortperiod: '$266.85',
       },
-      { category: 'Prepayment', term: null, amortperiod: null },
       {
         category: 'Principal Payments',
         term: '$11,303.09',
@@ -316,7 +307,6 @@ describe('MortgageCalculatorComponent', () => {
         term: '$246.32',
         amortperiod: '$246.32',
       },
-      { category: 'Prepayment', term: null, amortperiod: null },
       {
         category: 'Principal Payments',
         term: '$8,278.67',
@@ -371,7 +361,6 @@ describe('MortgageCalculatorComponent', () => {
         term: '$133.42',
         amortperiod: '$133.42',
       },
-      { category: 'Prepayment', term: null, amortperiod: null },
       {
         category: 'Principal Payments',
         term: '$11,320.30',

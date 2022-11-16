@@ -49,7 +49,7 @@ export class MortgageCalculatorComponent implements OnInit {
     ]),
     prepaymentFreq: new UntypedFormControl(''),
     startWithPayment: new UntypedFormControl('', {
-      validators: [Validators.pattern('^[0-9]*$')],
+      validators: [Validators.pattern('^[1-9]*$')],
     }),
   });
 
@@ -201,8 +201,7 @@ export class MortgageCalculatorComponent implements OnInit {
       numOfPayments: this.mortgageInfo.numOfPayments,
       frequencyPayment: this.mortgageInfo.frequencyPayment,
       prepayment: prepaymentValue ? prepaymentValue : null,
-      totalInterestSavings:
-        mortFreq == 'monthly' ? null : this.mortgageInfo.interestSavings,
+      totalInterestSavings: this.mortgageInfo.interestSavings,
     };
 
     // Seperate Term Data
@@ -214,11 +213,10 @@ export class MortgageCalculatorComponent implements OnInit {
         this.mortgageInfo.termPrincipal + this.mortgageInfo.termInterest,
       frequencyPayment: this.mortgageInfo.frequencyPayment,
       prepayment: prepaymentValue ? prepaymentValue : null,
-      totalInterestSavings:
-        mortFreq == 'monthly' ? null : this.mortgageInfo.termInterestSavings,
+      totalInterestSavings: this.mortgageInfo.termInterestSavings,
     };
 
-    this.populateMortgageSummary(amortizationInfo, termInfo);
+    this.populateMortgageSummary(amortizationInfo, termInfo, mortFreq);
 
     this.populateChart(
       this.mortgageInfo.chartData,
@@ -246,7 +244,6 @@ export class MortgageCalculatorComponent implements OnInit {
     let frequency = 1;
     let totalInterestPaid = 0;
     let totalPrincipalPaid = 0;
-    let totalInterestPaidInTerm = 0;
     const numOfTermPayments =
       mortgageCalculations.yearlyNumOfPayments * termYears;
     let termInterest = 0;
@@ -366,7 +363,8 @@ export class MortgageCalculatorComponent implements OnInit {
 
   private populateMortgageSummary(
     amortInfo: AmortizationInfo,
-    termInfo: TermInfo
+    termInfo: TermInfo,
+    mortFreq: string
   ) {
     this.mortgageSummary = [];
     this.mortgageSummary.push({
@@ -379,11 +377,13 @@ export class MortgageCalculatorComponent implements OnInit {
       term: this.currencyPipe.transform(termInfo['frequencyPayment']),
       amortperiod: this.currencyPipe.transform(amortInfo['frequencyPayment']),
     });
-    this.mortgageSummary.push({
-      category: 'Prepayment',
-      term: this.currencyPipe.transform(termInfo['prepayment']),
-      amortperiod: this.currencyPipe.transform(amortInfo['prepayment']),
-    });
+    if(this.currencyPipe.transform(termInfo['prepayment']) != null) {
+      this.mortgageSummary.push({
+        category: 'Prepayment',
+        term: this.currencyPipe.transform(termInfo['prepayment']),
+        amortperiod: this.currencyPipe.transform(amortInfo['prepayment']),
+      });  
+    }
     this.mortgageSummary.push({
       category: 'Principal Payments',
       term: this.currencyPipe.transform(termInfo['principalpayments']),
@@ -399,13 +399,15 @@ export class MortgageCalculatorComponent implements OnInit {
       term: this.currencyPipe.transform(termInfo['totalcost']),
       amortperiod: this.currencyPipe.transform(amortInfo['totalcost']),
     });
-    this.mortgageSummary.push({
-      category: 'Total interest savings',
-      term: this.currencyPipe.transform(termInfo['totalInterestSavings']),
-      amortperiod: this.currencyPipe.transform(
-        amortInfo['totalInterestSavings']
-      ),
-    });
+    if(mortFreq != 'monthly' || this.currencyPipe.transform(termInfo['prepayment']) != null) {
+      this.mortgageSummary.push({
+        category: 'Total interest savings',
+        term: this.currencyPipe.transform(termInfo['totalInterestSavings']),
+        amortperiod: this.currencyPipe.transform(
+          amortInfo['totalInterestSavings']
+        ),
+      });
+    }
     this.dataSource.data = this.mortgageSummary;
   }
 
