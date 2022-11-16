@@ -137,13 +137,15 @@
   </div>
 
   <div class="plotted-charts">
-    <h3>Payment Diagram</h3>
+    <h2>Payment Diagram</h2>
 
     <div class="line-chart">
+      <h3>Payment History</h3>
       <app-charts [chartType]="'line'" [inputLineChartLabels]="paymenLineChartLabels"
         [inputLineChartDatasets]="paymentLineChartDataSets"></app-charts>
     </div>
     <div class="bar-chart">
+      <h3>Interest Payment</h3>
       <app-charts [chartType]="'bar'" [inputBarChartLabels]="paymenBarChartLabels"
         [inputBarChartDatasets]="paymentBarChartDataSets"></app-charts>
     </div>
